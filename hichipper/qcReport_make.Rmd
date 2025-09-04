@@ -23,7 +23,6 @@ suppressWarnings(suppressMessages(library(reshape2)))
 suppressWarnings(suppressMessages(library(readr)))
 suppressWarnings(suppressMessages(library(knitr)))
 suppressWarnings(suppressMessages(library(networkD3)))
-suppressWarnings(suppressMessages(library(tidyverse)))
 
 options(scipen=999)
 
@@ -44,11 +43,10 @@ anchors <- data.frame()
 
 # Creates a dataframe of summary statistics from the individual sample log output files
 readstats <- foreach(sample = samples, .combine="rbind") %do% {
-  sfilename <- file.path(paste0(cwd, "/", outdir, "/", sample, ".stat"))
+  # sfilename <- file.path(paste0(cwd, "/", outdir, "/", sample, ".stat"))
+  sfilename <- file.path(paste0(outdir, "/", sample, ".stat"))
+
   rs <- read.table(sfilename, header=FALSE, stringsAsFactors = FALSE, sep = "=")
-  rs <- separate(rs, V2, c("V2","file"), sep = " ")
-  rs$V2 <- as.numeric(rs$V2)
-  rs <- rs %>% select(-c(file)) 
   anchors <- rbind(anchors, data.frame(sample= sample, npeaks = rs[12,2] ))
   min_length <- rs[13,2]
   max_length <- rs[14,2]
@@ -179,7 +177,9 @@ The second summary table shows the total number of intrachromosomal pets and the
 
 # Get loop lengths for histogram
 loop_pets <- foreach(sample = samples) %do% {
-  sfilename <- file.path(paste0(cwd, "/",outdir, "/",sample , ".intra.loop_counts.bedpe"))
+  # sfilename <- file.path(paste0(cwd, "/",outdir, "/",sample , ".intra.loop_counts.bedpe"))
+  sfilename <- file.path(paste0(outdir, "/", sample, ".intra.loop_counts.bedpe"))
+
   x <- suppressMessages(read_delim(sfilename, " ", col_names = FALSE, progress = FALSE))
   intra <- x[,1]==x[,4]
   x <- x[intra,]

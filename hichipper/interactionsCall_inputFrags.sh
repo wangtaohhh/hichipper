@@ -2,7 +2,7 @@
 
 # Parse parameters
 WK_DIR=$1
-OUT_NAME=$2
+OUT_NAME_before_parsing=$2    # For parallel using, OUT_NAME here is a absolute path, so the OUT_NAME in code cannot be added to a correct absolute path
 VALID_PAIRS=$3
 SAMPLE=$4
 PEAKFILE=$5
@@ -13,17 +13,27 @@ HALF_LEN=$9
 UCSC=${10}
 NO_MERGE=${11}
 
+
+# parsing the $OUT_NAME_before_parsing
+OUT_NAME=${OUT_NAME_before_parsing##*/}
+
+echo "new OUT_NAME is: ${OUT_NAME}"
+
+
 # Log from the shell script side
 LOG_FILE="${WK_DIR}/${OUT_NAME}/${OUT_NAME}.hichipper.log"
+# 20250903 changed by Tao
+# LOG_FILE="${OUT_NAME}/out.hichipper.log"
+
 echo "`date`: Processing ${SAMPLE}" | tee -a $LOG_FILE
 
 # Merge gaps; check bedtools
 echo "`date`: Intersecting PETs with anchors" | tee -a $LOG_FILE
 if [ "$NO_MERGE" = true ] ; then
-	bedtools sort -i "${PEAKFILE}" | awk '{print $1"\t"$2"\t"$3}' > "${OUT_NAME}/${SAMPLE}_temporary_peaks.merged.bed.tmp"
+	bedtools sort -i "${PEAKFILE}" | awk '{print $1"\t"$2"\t"$3}' > "${WK_DIR}/${OUT_NAME}/${SAMPLE}_temporary_peaks.merged.bed.tmp"
 	echo "`date`: nearby anchors will not be merged; WARNING: this may inflate summary statistics." | tee -a $LOG_FILE
 else
-	bedtools sort -i "${PEAKFILE}" | bedtools merge -d $MERGE_GAP -i stdin > "${OUT_NAME}/${SAMPLE}_temporary_peaks.merged.bed.tmp"
+	bedtools sort -i "${PEAKFILE}" | bedtools merge -d $MERGE_GAP -i stdin > "${WK_DIR}/${OUT_NAME}/${SAMPLE}_temporary_peaks.merged.bed.tmp"
 	echo "`date`: Finished the anchor merging." | tee -a $LOG_FILE
 fi
 
@@ -60,8 +70,11 @@ echo "`date`: Total number of reads in anchors: ${READS_IN_ANCHORS}" | tee -a $L
 cat "${WK_DIR}/${OUT_NAME}/${SAMPLE}_interactions.bedpe.tmp" | awk '{print $1"\t"$2"\t"$3}' | bedtools intersect -loj -a stdin -b "${WK_DIR}/${OUT_NAME}/${SAMPLE}_temporary_peaks.merged.bed.tmp" | awk '{print $4,$5,$6}' OFS='\t' > "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor1.bed.tmp"
 cat "${WK_DIR}/${OUT_NAME}/${SAMPLE}_interactions.bedpe.tmp" | awk '{print $4"\t"$5"\t"$6}' | bedtools intersect -loj -a stdin -b "${WK_DIR}/${OUT_NAME}/${SAMPLE}_temporary_peaks.merged.bed.tmp" | awk '{print $4,$5,$6}' OFS='\t' > "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor2.bed.tmp"
 
-paste "${OUT_NAME}/${SAMPLE}_anchor1.bed.tmp" "${OUT_NAME}/${SAMPLE}_anchor2.bed.tmp" | awk '{if ($1 != "." && $4 != ".") print}' > "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor.interactions.bedpe.tmp"
-cut -f1-6  "${OUT_NAME}/${SAMPLE}_anchor.interactions.bedpe.tmp" | sort | uniq -c | awk '{print $2,$3,$4,$5,$6,$7,".",$1}' >  "${WK_DIR}/${OUT_NAME}/${SAMPLE}.loop_counts.bedpe.tmp"
+paste "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor1.bed.tmp" "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor2.bed.tmp" | awk '{if ($1 != "." && $4 != ".") print}' > "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor.interactions.bedpe.tmp"
+
+cut -f1-6  "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor.interactions.bedpe.tmp" | sort | uniq -c | awk '{print $2,$3,$4,$5,$6,$7,".",$1}' >  "${WK_DIR}/${OUT_NAME}/${SAMPLE}.loop_counts.bedpe.tmp"
+
+
 Mapped_unique_intra_quality_anchor=`awk '$1 == $4 {print $0}' "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor.interactions.bedpe.tmp" | wc -l | awk '{print $1}'`
 Mapped_unique_intra_quality_anchor_small=`awk -v MIN_DIST="$MIN_DIST" '$1 == $4 && (($5+$6)/2 - ($2+$3)/2)<=MIN_DIST {print $0}' "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor.interactions.bedpe.tmp" | wc -l | awk '{print $1}'`
 Mapped_unique_intra_quality_anchor_med=`awk -v MIN_DIST="$MIN_DIST" -v MAX_DIST="$MAX_DIST" '$1 == $4 && (($5+$6)/2 - ($2+$3)/2)>=MIN_DIST && (($5+$6)/2 - ($2+$3)/2)<=MAX_DIST {print $0}' "${WK_DIR}/${OUT_NAME}/${SAMPLE}_anchor.interactions.bedpe.tmp" | wc -l | awk '{print $1}'`
