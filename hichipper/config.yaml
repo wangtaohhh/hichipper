@@ -1,0 +1,8 @@
+peaks:
+  - EACH,SELF
+resfrags:
+  - /storage/ss1/usr/wt/data_folder/hic_pro_ref/hg38_MboI_resfrag.bed.gz
+hicpro_output:
+  - /storage/ss1/usr/wt/nat_genetics_hichip_data/cellline_compare_fit_and_hichipper/sknmc_hichip_rawdata_h3k27ac/sknmc_h3k27ac_hicpro_output
+working_dir:
+  - /storage/ss1/usr/wt/nat_genetics_hichip_data/cellline_compare_fit_and_hichipper/EACH_SELF_hichipper
