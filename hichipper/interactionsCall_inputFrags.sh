@@ -121,3 +121,8 @@ echo "Number_of_Anchors=${NUM_PEAKS}" >> "${WK_DIR}/${OUT_NAME}/${SAMPLE}.stat"
 echo "MIN_LENGTH=${MIN_DIST}" >> "${WK_DIR}/${OUT_NAME}/${SAMPLE}.stat"
 echo "MAX_LENGTH=${MAX_DIST}" >> "${WK_DIR}/${OUT_NAME}/${SAMPLE}.stat"
 echo "READS_IN_ANCHORS=${READS_IN_ANCHORS}" >> "${WK_DIR}/${OUT_NAME}/${SAMPLE}.stat"
+
+# convert .bedpe file from space splited to tab splited
+
+sed 's/ /\t/g' "${WK_DIR}/${OUT_NAME}/${SAMPLE}.inter.loop_counts.bedpe" > "${WK_DIR}/${OUT_NAME}/${SAMPLE}.inter.loop_counts.tab_splited.bedpe"
+sed 's/ /\t/g' "${WK_DIR}/${OUT_NAME}/${SAMPLE}.intra.loop_counts.bedpe" > "${WK_DIR}/${OUT_NAME}/${SAMPLE}.intra.loop_counts.tab_splited.bedpe"

@@ -43,3 +43,4 @@ vignettes/*.pdf
 .cache/
 .tox/
 .coverage
+.DS_Store
