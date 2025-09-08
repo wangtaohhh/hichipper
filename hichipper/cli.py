@@ -123,9 +123,23 @@ def main(mode, out, keep_temp_files,
 	p_tmp_log_file_name = hichipperProject(script_dir, mode, out, peaks, restriction_frags,
 		skip_resfrag_pad, skip_background_correction)
 
-	log_filename = p_tmp_log_file_name.working_dir.split('/')[-1]
+
+
+	p_tmp = hichipperProject(script_dir, mode, out, peaks, restriction_frags,
+		skip_resfrag_pad, skip_background_correction)
+	if (p_tmp.go == "yaml"):
+		log_filename = p_tmp_log_file_name.working_dir.split('/')[-1]
+		logf = open(out + "/" + log_filename + ".hichipper.log", 'w')
 	# logf = open(out + "/" + out + ".hichipper.log", 'w')
-	logf = open(out + "/" + log_filename + ".hichipper.log", 'w')
+
+
+	else:
+
+		log_filename = out.split("/")[-1]
+		logf = open(out + "/" + log_filename + ".hichipper.log", 'w')
+
+
+	
 
 	click.echo(gettime() + "Starting hichipper pipeline v%s" % __version__, file = logf)
 	click.echo(gettime() + "Starting hichipper pipeline v%s" % __version__)
@@ -200,6 +214,9 @@ def main(mode, out, keep_temp_files,
 		# Call putative interactions
 		for i in range(len(samples)):
 			hichipperRun = os.path.join(script_dir, 'interactionsCall.sh')	
+
+
+			# out here is the --out parameter in hichipper calling
 			cmd = ['bash', hichipperRun, cwd, out, p.hicprooutput, samples[i], peakfilespersample[i], min_dist, max_dist, merge_gap, str(halfLength), ucscoutput, no_merge_str]        
 			call(cmd)
 			if not os.path.isfile(out + "/" + samples[i] + ".stat"):
@@ -241,7 +258,12 @@ def main(mode, out, keep_temp_files,
 		cftg = ' '.join(samples)
 		call(['cp', os.path.join(script_dir, 'qcReport_make.Rmd'), out + '/qcReport_make.Rmd'])
 		call(['cp', os.path.join(script_dir, 'qcReport.R'), out + '/qcReport.R'])
-		cmd = [Rscript, out + '/qcReport.R', script_dir, str(out), cwd, __version__ , cftg] 		
+
+		Rscript_just_for_output_qcReport = '/storage/ss1/software/alias/bin/Rscript'    # some packages in conda is complicated 
+		# cmd = [Rscript_just_for_output_qcReport, out + '/qcReport.R', script_dir, str(out), cwd, __version__ , cftg] 		
+
+		cmd = [Rscript_just_for_output_qcReport, out + '/qcReport.R', script_dir, str(out), out, __version__ , cftg] 		
+
 		click.echo(gettime())
 		click.echo(cmd)
 		call(cmd)
