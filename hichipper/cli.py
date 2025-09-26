@@ -190,6 +190,8 @@ def main(mode, out, keep_temp_files,
 	peakopts = ["COMBINED,ALL", "EACH,ALL", "COMBINED,SELF", "EACH,SELF"]
 	if(p.peaks in peakopts):
 		macs2 = get_software_path("macs2", macs2_path)
+	# elif mode == "call":
+	# 	pass
 	elif not os.path.isfile(peaks):
 		sys.exit('ERROR: Could not identify the ' + peaks + ' file; correctly specify file location or use special variable {COMBINED,EACH},{ALL,SELF} for peaks')
 

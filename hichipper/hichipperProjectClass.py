@@ -24,11 +24,16 @@ class hichipperProject():
 			self.resfrags = m['resfrags'][0]
 			self.hicprooutput = m['hicpro_output'][0]
 			self.go = "yaml"
+
+			# add by Tao: 20250903
+			self.working_dir = m["working_dir"][0]
+
 		else:
 			self.go = "call"
 			self.peaks = peaks
 			self.resfrags = restriction_frags
-		
+			
+
 		#------------------------------
 		# Determine if restriction fragment calling is happening or not
 		#------------------------------

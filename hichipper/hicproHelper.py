@@ -8,7 +8,7 @@ from subprocess import call, check_call
 #------------------------------------------------------------------
 def peakHelper(peaks, hicprooutput, resfrags, halfLength, peak_pad, out, samples,
 	Rscript, skip_resfrag_pad, skip_background_correction,
-	logf, macs2_string, macs2_genome, script_dir, no_merge_str):
+	logf, macs2_string, macs2_genome, script_dir):
 	
 	peakfilespersample = []
 	# Call peaks integrating over all samples for self ligation reads
@@ -122,6 +122,7 @@ def peakHelper(peaks, hicprooutput, resfrags, halfLength, peak_pad, out, samples
 
 	# Peaks are apparently determined or user-supplied...
 	else:
+		click.echo("PeakHelper" + peaks)
 		click.echo(gettime() + "Using user-defined peaks file " + peaks +  " for analysis.", logf)
 		os.system("cp " + peaks + " " + out + "/userSuppliedPeaks.bed.tmp")
 		peakfilespersample = [out + "/userSuppliedPeaks.bed.tmp"] * len(samples)
@@ -140,8 +141,7 @@ def peakHelper(peaks, hicprooutput, resfrags, halfLength, peak_pad, out, samples
 	else:
 		click.echo(gettime() + "Performing restriction fragment-aware padding", logf)
 		for peakFile in list(set(peakfilespersample)):
-			cmd = [Rscript, os.path.join(script_dir, 'resFragAnchorProcess.R'), resfrags, peakFile, no_merge_str]
-			call(cmd)
+			call([Rscript, os.path.join(script_dir, 'resFragAnchorProcess.R'), resfrags, peakFile])
 		peakfilespersample = [peakFile + "rf.tmp" for peakFile in peakfilespersample]
 	return(peakfilespersample)
 	
@@ -153,7 +153,7 @@ def samplesHelper(keep_samples, ignore_samples, hicprooutput, logf):
 	bwt_samples = os.popen('ls ' + hicprooutput + '/bowtie_results/bwt2').read().strip().split("\n")
 	hic_samples = os.popen('ls ' + hicprooutput + '/hic_results/data').read().strip().split("\n")
 
-	samples = intersect(bwt_samples, hic_samples)
+	samples = intersect(hic_samples, hic_samples)
 
 	if(keep_samples != "ALL"):
 		keeplist = keep_samples.split(",")
@@ -165,11 +165,12 @@ def samplesHelper(keep_samples, ignore_samples, hicprooutput, logf):
 		for byesample in igslist:
 			click.echo(gettime() + "Attempting to remove " + byesample + " from processing", logf)
 			if byesample in samples: samples.remove(byesample)
-
+	# print("caonima", len(samples))
 	if not len(samples) > 0:
+	# if True:
 		sys.exit('ERROR: Could not import any samples from the user specification; check flags, logs and .yaml configuration; quitting')
 
-	for sample in samples:
-		if not verify_sample_hichipper_old(sample, True, hicprooutput):
-			sys.exit('ERROR: Missing hic_results or bowtie_results files for ' + sample + "; either exclude the sample or manage the file architecture/input")
+	# for sample in samples:
+	# 	if not verify_sample_hichipper_old(sample, True, hicprooutput):
+	# 		sys.exit('ERROR: Missing hic_results or bowtie_results files for ' + sample + "; either exclude the sample or manage the file architecture/input")
 	return(samples)

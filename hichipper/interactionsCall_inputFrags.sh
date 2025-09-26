@@ -125,4 +125,4 @@ echo "READS_IN_ANCHORS=${READS_IN_ANCHORS}" >> "${WK_DIR}/${OUT_NAME}/${SAMPLE}.
 # convert .bedpe file from space splited to tab splited
 
 sed 's/ /\t/g' "${WK_DIR}/${OUT_NAME}/${SAMPLE}.inter.loop_counts.bedpe" > "${WK_DIR}/${OUT_NAME}/${SAMPLE}.inter.loop_counts.tab_splited.bedpe"
-sed 's/ /\t/g' "${WK_DIR}/${OUT_NAME}/${SAMPLE}.intra.loop_counts.bedpe" > "${WK_DIR}/${OUT_NAME}/${SAMPLE}.intra.loop_counts.tab_splited.bedpe"
+sed 's/ /\t/g' "${WK_DIR}/${OUT_NAME}/${SAMPLE}.filt.intra.loop_counts.bedpe" > "${WK_DIR}/${OUT_NAME}/${SAMPLE}.intra.loop_counts.tab_splited.bedpe"
